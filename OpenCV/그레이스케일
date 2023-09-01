@@ -1,0 +1,46 @@
+import os
+import cv2
+import numpy as np
+
+#경로수정
+originalImgPath = "C:\\Users\\SMART08\\stdcode6\\Session09 - 컴퓨터비전\\images_sy\\"
+os.chdir(originalImgPath)
+files = os.listdir(originalImgPath)
+print(files)
+
+# Img 크기 지정
+IMG_W = 200
+IMG_H = 300
+
+def createDirectory(directory):
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+            print("mkdir is successfully done")
+        else:
+            print("directory is already exist")
+    except OSError:
+        print("Error: Failed to create the directory.")
+
+createDirectory(originalImgPath + "grayScaledImg2")
+  # 생성된 디렉토리 경로 지정
+scaledImgPath = originalImgPath + "grayScaledImg2\\"  
+
+for file in files:
+    if '.jpg' in file:
+        os.chdir(originalImgPath) #원본 경로로 초기화
+        img_array = np.fromfile(file, np.uint8)
+        img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+        
+        # .jpg 형식의 파일들을 IMREAD_COLOR로 읽어들인 후 Gray로 convert
+        f_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        resized_img = cv2.resize(f_gray, (IMG_W, IMG_H))
+        newImgName = file.split(".")[0] + "_gray.jpg"
+        
+        extension = os.path.splitext(newImgName)[1] 
+        encoded_img = cv2.imencode(extension, resized_img)[1].tobytes()
+        os.chdir(scaledImgPath) #저장될 새 디렉토리로 경로 변경
+        
+        with open(newImgName, mode='wb') as f:
+            f.write(encoded_img)
+        print("Grayscaled image: " + newImgName +  " is saved successfully.")
